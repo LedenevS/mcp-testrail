@@ -1,59 +1,93 @@
-# TestRail MCP Server
+# TestRail MCP Integration
 
-This Model Context Protocol (MCP) server provides tools for interacting with TestRail directly from Claude AI and other MCP-supported clients like Cursor. It allows you to manage test cases, projects, suites, runs, and more without leaving your conversation with the AI.
+This project provides a [Model Context Protocol (MCP)](https://github.com/anthropics/anthropic-cookbook/tree/main/model-context-protocol) integration for TestRail, allowing AI assistants to interact with TestRail's API.
 
-## Available Tools
+## Setup
 
-The TestRail MCP server provides the following tools:
+1. Install dependencies:
+   ```
+   npm install
+   ```
 
-| Category | Tools |
-|----------|-------|
-| **Projects** | `getProjects`, `getProject` |
-| **Suites** | `getSuites`, `getSuite`, `addSuite`, `updateSuite` |
-| **Cases** | `getCase`, `getCases`, `addCase`, `updateCase`, `deleteCase`, `getCaseTypes`, `getCaseFields`, `copyToSection`, `moveToSection`, `getCaseHistory`, `updateCases` |
-| **Sections** | `getSection`, `getSections`, `addSection`, `moveSection`, `updateSection`, `deleteSection` |
-| **Runs** | `getRuns`, `getRun`, `addRun`, `updateRun` |
-| **Tests** | `getTests`, `getTest` |
-| **Results** | `getResults`, `getResultsForCase`, `getResultsForRun`, `addResultForCase`, `addResultsForCases` |
-| **Plans** | `getPlans` |
-| **Milestones** | `getMilestones` |
-| **Shared Steps** | `getSharedSteps` |
+2. Configure your TestRail credentials in `.env`:
+   ```
+   TESTRAIL_URL=https://your-instance.testrail.com/index.php?
+   TESTRAIL_USERNAME=your-username
+   TESTRAIL_API_KEY=your-api-key
+   ```
 
-## Usage
+   > ⚠️ **Important**: The URL format is critical. Make sure it's exactly:
+   > `https://your-instance.testrail.com/index.php?`
 
-You can connect this MCP server by setting like the below. This method uses `npx` to automatically download and run the latest version of the package, eliminating the need for local installation.
+3. Build the project:
+   ```
+   npm run build
+   ```
 
-```json
-// Example configuration using npx
-{
-  "mcpServers": {
-    "testrail": {
-      "command": "npx",
-      "args": ["@bun913/mcp-testrail@latest"],
-      "env": {
-        "TESTRAIL_URL": "https://your-instance.testrail.io", // Replace with your TestRail URL
-        "TESTRAIL_USERNAME": "your-email@example.com", // Replace with your TestRail username
-        "TESTRAIL_API_KEY": "YOUR_API_KEY" // Replace with your TestRail API key
-      }
-    }
-  }
-}
-```
+4. Start the debug server:
+   ```
+   npm run debug
+   ```
+
+5. Access the MCP Inspector:
+   ```
+   http://localhost:6274?proxyPort=6277
+   ```
 
 ## Troubleshooting
 
-- **`spawn node ENOENT` errors**: Ensure that Node.js is properly installed and in your PATH.
-- **Connection issues**: Verify that the server is running and the URL is correctly configured in your MCP client.
-- **Authentication issues**: Check your TestRail API credentials in the `.env` file.
-- **SSE connection errors**: If you see `SSE error: TypeError: fetch failed: connect ECONNREFUSED`, make sure the server is running on the specified port.
-- **Your conversation is too long**: Pleae use `limit` and `offset` parameter for test cases
+If you encounter issues with the TestRail API connection:
 
-## Contributing
+1. Verify direct API connection with a simple test script:
+   ```javascript
+   // save as test-connection.js
+   const axios = require('axios');
+   require('dotenv').config();
+   
+   const url = process.env.TESTRAIL_URL + 'api/v2/get_projects';
+   const auth = Buffer.from(`${process.env.TESTRAIL_USERNAME}:${process.env.TESTRAIL_API_KEY}`).toString('base64');
+   
+   axios.get(url, {
+     headers: {
+       'Authorization': `Basic ${auth}`,
+       'Content-Type': 'application/json'
+     }
+   })
+   .then(response => console.log('Success:', response.data))
+   .catch(error => console.error('Error:', error.response?.data || error.message));
+   ```
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+2. Common issues:
+   - **URL format**: Ensure your TestRail URL ends with `index.php?`
+   - **API key**: Make sure you're using an API key, not a password
+   - **Port conflicts**: If ports 6274 or 6277 are already in use, kill processes:
+     ```
+     pkill -f "node scripts/debug.js"
+     ```
 
-## Acknowledgements
+## API Integration Details
 
-- [TestRail API](https://docs.testrail.techmatrix.jp/testrail/docs/702/api/)
-- [Model Context Protocol SDK](https://github.com/modelcontextprotocol/typescript-sdk)
+The TestRail MCP integration connects to the TestRail API with the following considerations:
+
+1. **URL Handling**: Uses the exact URL from environment variables without modification
+2. **Request Format**: Properly formats API requests to TestRail
+3. **Error Handling**: Enhanced error logging for easier troubleshooting
+4. **Environment Configuration**: Clear examples of required environment variables
+
+See the `CONTRIBUTION.md` file for more details on implementation and debugging.
+
+## Available Tools
+
+The integration provides the following TestRail API capabilities:
+
+- Projects: List, view, create, update
+- Test Suites: List, view, create, update
+- Test Cases: List, view, create, update, delete
+- Test Runs: Create, update, get results
+- Sections: Manage test case organization
+- Milestones: Track project progress
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 

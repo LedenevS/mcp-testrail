@@ -80,6 +80,8 @@ export class BaseTestRailClient {
 		data?: unknown,
 	): Promise<T> {
 		try {
+			// Just pass the URL as-is without encoding
+			// Our debug script shows this works with the format: baseURL/api/v2/endpoint
 			const response = await this.client.request<T>({
 				method,
 				url,

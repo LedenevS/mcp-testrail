@@ -16,10 +16,8 @@ export class ProjectsClient extends BaseTestRailClient {
 		projectId: GetProjectInput["projectId"],
 	): Promise<TestRailProject> {
 		try {
-			const response = await this.client.get<TestRailProject>(
-				`/api/v2/get_project/${projectId}`,
-			);
-			return response.data;
+			// Use the request method from BaseTestRailClient which URL-encodes the path
+			return await this.request<TestRailProject>("get", `/api/v2/get_project/${projectId}`);
 		} catch (error) {
 			throw handleApiError(error, `Failed to get project ${projectId}`);
 		}
@@ -32,16 +30,8 @@ export class ProjectsClient extends BaseTestRailClient {
 		params?: Record<string, string | number | boolean | null | undefined>,
 	): Promise<TestRailProject[]> {
 		try {
-			const response = await this.client.get<TestRailProject[]>(
-				"/api/v2/get_projects",
-				{ params },
-			);
-			// For debugging
-			console.error(
-				"TestRail API getProjects raw response:",
-				JSON.stringify(response.data),
-			);
-			return response.data;
+			// Use the request method from BaseTestRailClient which URL-encodes the path
+			return await this.request<TestRailProject[]>("get", "/api/v2/get_projects", params);
 		} catch (error) {
 			throw handleApiError(error, "Failed to get projects");
 		}

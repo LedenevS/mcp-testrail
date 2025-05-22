@@ -16,13 +16,9 @@ if (
 	);
 }
 
-// Correct URL format: https://example.testrail.com/index.php?/
+// Use the exact URL format from environment variable
 const url = process.env.TESTRAIL_URL;
-const baseURL = url.endsWith("/index.php?/")
-	? url
-	: url.endsWith("/")
-		? `${url}index.php?/`
-		: `${url}/index.php?/`;
+const baseURL = url; // No transformation needed
 
 // TestRail client configuration
 const testRailConfig: TestRailClientConfig = {
